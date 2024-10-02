@@ -15,6 +15,12 @@ test_folder = '/test'
 images_folder = '/images'
 annotation_folder = '/Annotations'
 
+Path(pascal_voc_path + train_folder + images_folder).mkdir(parents=True, exist_ok=True)
+Path(pascal_voc_path + train_folder + annotation_folder).mkdir(parents=True, exist_ok=True)
+Path(pascal_voc_path + val_folder + images_folder).mkdir(parents=True, exist_ok=True)
+Path(pascal_voc_path + val_folder + annotation_folder).mkdir(parents=True, exist_ok=True)
+Path(pascal_voc_path + test_folder + images_folder).mkdir(parents=True, exist_ok=True)
+Path(pascal_voc_path + test_folder + annotation_folder).mkdir(parents=True, exist_ok=True)
 
 # Get list of all training images
 jpeg_file_list = [path for path in Path(train_path).rglob('*.jpeg')]
