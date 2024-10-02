@@ -10,12 +10,17 @@ from pathlib import Path
 import random
 import os
 import sys
+import re
 
 # Define paths to image folders
 image_path = '/content/images/all'
 train_path = '/content/images/train'
 val_path = '/content/images/validation'
 test_path = '/content/images/test'
+
+Path(train_path).mkdir(parents=True, exist_ok=True)
+Path(val_path).mkdir(parents=True, exist_ok=True)
+Path(test_path).mkdir(parents=True, exist_ok=True)
 
 # Get list of all images
 jpeg_file_list = [path for path in Path(image_path).rglob('*.jpeg')]
@@ -40,39 +45,38 @@ test_percent = 0.02 # 2% go to test
 train_num = int(file_num*train_percent)
 val_num = int(file_num*val_percent)
 test_num = file_num - train_num - val_num
-print('Images moving to train: %d' % train_num)
-print('Images moving to validation: %d' % val_num)
-print('Images moving to test: %d' % test_num)
+
+def handleFile(new_path):
+    move_me = random.choice(file_list)
+    fn = move_me.name
+    base_fn = move_me.stem
+    parent_path = move_me.parent
+    parent_dir_suffix = os.path.dirname(move_me) + '_'
+    os.rename(move_me, os.path.join(new_path, parent_dir_suffix + fn))
+    xml_fn = base_fn + '.xml'
+    xml_me = os.path.join(parent_path, xml_fn)
+    if (os.path.isfile(xml_me)):
+        with open(xml_me) as fxml:
+            xml_content = fxml.read()
+            xml_content = re.sub('<filename>' + fn + '</filename>', '<filename>' + parent_dir_suffix + fn + '</filename>', xml_content)
+            fxml.write(xml_content)
+        os.rename(xml_me, os.path.join(new_path, parent_dir_suffix + xml_fn))
+    file_list.remove(move_me) 
 
 # Select 88% of files randomly and move them to train folder
+print('Images moving to train: %d' % train_num)
 for i in range(train_num):
-    move_me = random.choice(file_list)
-    fn = move_me.name
-    base_fn = move_me.stem
-    parent_path = move_me.parent
-    xml_fn = base_fn + '.xml'
-    os.rename(move_me, train_path+'/'+fn)
-    os.rename(os.path.join(parent_path,xml_fn),os.path.join(train_path,xml_fn))
-    file_list.remove(move_me)
+    handleFile(train_path)
+
 
 # Select 10% of remaining files and move them to validation folder
+print('Images moving to validation: %d' % val_num)
 for i in range(val_num):
-    move_me = random.choice(file_list)
-    fn = move_me.name
-    base_fn = move_me.stem
-    parent_path = move_me.parent
-    xml_fn = base_fn + '.xml'
-    os.rename(move_me, val_path+'/'+fn)
-    os.rename(os.path.join(parent_path,xml_fn),os.path.join(val_path,xml_fn))
-    file_list.remove(move_me)
+    handleFile(val_path)
+
 
 # Move remaining files to test folder
+print('Images moving to test: %d' % test_num)
 for i in range(test_num):
-    move_me = random.choice(file_list)
-    fn = move_me.name
-    base_fn = move_me.stem
-    parent_path = move_me.parent
-    xml_fn = base_fn + '.xml'
-    os.rename(move_me, test_path+'/'+fn)
-    os.rename(os.path.join(parent_path,xml_fn),os.path.join(test_path,xml_fn))
-    file_list.remove(move_me)
+    handleFile(test_path)
+
