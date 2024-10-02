@@ -54,7 +54,7 @@ def handleFile(new_path):
     fn = move_me.name
     base_fn = move_me.stem
     parent_path = move_me.parent
-    parent_dir_suffix = os.path.dirname(move_me) + '_'
+    parent_dir_suffix = os.path.basename(parent_path) + '_'
     os.rename(move_me, os.path.join(new_path, parent_dir_suffix + fn))
     xml_fn = base_fn + '.xml'
     xml_me = os.path.join(parent_path, xml_fn)
@@ -62,6 +62,7 @@ def handleFile(new_path):
         with open(xml_me, 'r+') as fxml:
             xml_content = fxml.read()
             xml_content = re.sub('<filename>' + fn + '</filename>', '<filename>' + parent_dir_suffix + fn + '</filename>', xml_content)
+            fxml.truncate(0)
             fxml.write(xml_content)
         os.rename(xml_me, os.path.join(new_path, parent_dir_suffix + xml_fn))
     file_list.remove(move_me) 
