@@ -1,13 +1,3 @@
-############################################################
-# Training of the model for the Smart-Model-Railway-Cam
-# This program implements transfer-learning. It cannot
-# be executed in isolation. It is called from the jupyter
-# notebook "trainSMRC.ipynb". 
-#
-# File: train.py
-# Author: Detlef Heinze 
-# Version: 1.0    Date: 06.06.2023   
-###########################################################
 import numpy as np
 import os
 
@@ -28,11 +18,11 @@ logging.set_verbosity(logging.ERROR)
 LABELMAP_FILENAME = 'images/all/labelmap.txt'
 text_file = open(LABELMAP_FILENAME, "r")
 classes = text_file.readlines()
+for c in classes:
+    c = c.replace('\n', '')
 print("\nClasses to be used:")
 print(classes)
 
-print("\nTransfer-Learning")
-print("Splitting training data into training-, validation- and test-data).")
 train_data = object_detector.DataLoader.from_pascal_voc(
     'images/train',
     'images/train',
@@ -77,5 +67,3 @@ print("\n\nEvaluating tflite-model")
 print("Evaluation result:")             
 result = model.evaluate_tflite(TFLITE_FILENAME, test_data)
 pprint(result, width=10)
-
-                               
