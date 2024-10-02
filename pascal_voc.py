@@ -37,7 +37,9 @@ for i in range(file_num):
     parent_path = move_me.parent
     xml_fn = base_fn + '.xml'
     os.rename(move_me, pascal_voc_path + train_folder + images_folder + '/' + fn)
-    os.rename(os.path.join(parent_path, xml_fn), os.path.join(pascal_voc_path + train_folder + annotation_folder, xml_fn))
+    xml_me = os.path.join(parent_path, xml_fn)
+    if (os.path.isfile(xml_me)):
+        os.rename(xml_me, os.path.join(pascal_voc_path + train_folder + annotation_folder, xml_fn))
 
 
 # Get list of all validation images
