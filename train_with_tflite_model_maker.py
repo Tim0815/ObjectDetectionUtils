@@ -25,27 +25,29 @@ tf.get_logger().setLevel('ERROR')
 from absl import logging
 logging.set_verbosity(logging.ERROR)
 
-LABELMAP_FILENAME = 'all/labelmap.txt'
+LABELMAP_FILENAME = 'images/all/labelmap.txt'
 text_file = open(LABELMAP_FILENAME, "r")
 classes = text_file.readlines()
+print("\nClasses to be used:")
+print(classes)
 
 print("\nTransfer-Learning")
-print("Splitting training data into training-,validation- and test-data).")
+print("Splitting training data into training-, validation- and test-data).")
 train_data = object_detector.DataLoader.from_pascal_voc(
-    'train',
-    'train',
+    'images/train',
+    'images/train',
     classes
 )
 
 validation_data = object_detector.DataLoader.from_pascal_voc(
-    'valid',
-    'valid',
+    'images/validation',
+    'images/validation',
     classes
 )
 
 test_data = object_detector.DataLoader.from_pascal_voc(
-    'test',
-    'test',
+    'images/test',
+    'images/test',
     classes
 )
 
