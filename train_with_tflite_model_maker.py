@@ -17,9 +17,7 @@ logging.set_verbosity(logging.ERROR)
 
 LABELMAP_FILENAME = 'images/all/labelmap.txt'
 text_file = open(LABELMAP_FILENAME, "r")
-classes = text_file.readlines()
-for c in classes:
-    c = c.replace('\n', '')
+classes = text_file.read().splitlines()
 print("\nClasses to be used:")
 print(classes)
 
