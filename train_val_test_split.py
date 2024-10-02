@@ -12,6 +12,7 @@ import os
 import sys
 import re
 
+
 # Define paths to image folders
 image_path = '/content/images/all'
 train_path = '/content/images/train'
@@ -21,6 +22,7 @@ test_path = '/content/images/test'
 Path(train_path).mkdir(parents=True, exist_ok=True)
 Path(val_path).mkdir(parents=True, exist_ok=True)
 Path(test_path).mkdir(parents=True, exist_ok=True)
+
 
 # Get list of all images
 jpeg_file_list = [path for path in Path(image_path).rglob('*.jpeg')]
@@ -46,6 +48,7 @@ train_num = int(file_num*train_percent)
 val_num = int(file_num*val_percent)
 test_num = file_num - train_num - val_num
 
+
 def handleFile(new_path):
     move_me = random.choice(file_list)
     fn = move_me.name
@@ -56,12 +59,13 @@ def handleFile(new_path):
     xml_fn = base_fn + '.xml'
     xml_me = os.path.join(parent_path, xml_fn)
     if (os.path.isfile(xml_me)):
-        with open(xml_me) as fxml:
+        with open(xml_me, 'r+') as fxml:
             xml_content = fxml.read()
             xml_content = re.sub('<filename>' + fn + '</filename>', '<filename>' + parent_dir_suffix + fn + '</filename>', xml_content)
             fxml.write(xml_content)
         os.rename(xml_me, os.path.join(new_path, parent_dir_suffix + xml_fn))
     file_list.remove(move_me) 
+
 
 # Select 88% of files randomly and move them to train folder
 print('Images moving to train: %d' % train_num)
