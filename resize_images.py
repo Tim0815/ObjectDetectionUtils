@@ -8,12 +8,6 @@ from math import floor
 from pathlib import Path
 
 
-def add_end_slash(path):
-    if path[-1] != '/':
-        return path + '/'
-    return path
-
-
 def create_path(path):
     path = Path(path)
     path.mkdir(parents=True, exist_ok=True)
@@ -28,11 +22,11 @@ def get_file_name(path):
 
 def process_image(file_path, output_path, x, y, save_box_images, mode):
     (base_dir, file_name, ext) = get_file_name(file_path)
-    image_path = '{}/{}.{}'.format(base_dir, file_name, ext)
-    xml = '{}/{}.xml'.format(base_dir, file_name)
+    # image_path = os.path.join(base_dir, file_name + '.' + ext)
+    xml = os.path.join(base_dir, file_name + '.xml')
     try:
         resize(
-            image_path,
+            file_path,
             xml,
             (x, y),
             output_path,
@@ -40,7 +34,7 @@ def process_image(file_path, output_path, x, y, save_box_images, mode):
             save_box_images=save_box_images
         )
     except Exception as e:
-        print('[ERROR] error with {}\n file: {}'.format(image_path, e))
+        print('[ERROR] error with {}\n file: {}'.format(file_path, e))
         print('--------------------------------------------------')
 
 
@@ -59,6 +53,7 @@ def resize(image_path,
            verbose=False
            ):
 
+    (base_dir, file_name, ext) = get_file_name(image_path)
     image = cv2.imread(image_path)
 
     mode = mode and mode.lower()
@@ -98,7 +93,7 @@ def resize(image_path,
 
     newBoxes = []
     xmlRoot = ET.parse(xml_path).getroot()
-    xmlRoot.find('filename').text = image_path.split('/')[-1]
+    xmlRoot.find('filename').text = str(file_name + '.' + ext)
     size_node = xmlRoot.find('size')
     size_node.find('width').text = str(newSize[0])
     size_node.find('height').text = str(newSize[1])
@@ -125,13 +120,13 @@ def resize(image_path,
             int(float(ymax.text))
             ])
 
-    (_, file_name, ext) = get_file_name(image_path)
-    cv2.imwrite(os.path.join(output_path, '.'.join([file_name, ext])), image)
+    new_img_file_name = os.path.join(output_path, file_name + '.' + ext)
+    cv2.imwrite(new_img_file_name, image)
 
     tree = ET.ElementTree(xmlRoot)
-    tree.write('{}/{}.xml'.format(output_path, file_name, ext))
+    tree.write(os.path.join(output_path, file_name + '.xml'))
     if int(save_box_images):
-        save_path = '{}/boxes_images/boxed_{}'.format(output_path, ''.join([file_name, '.', ext]))
+        save_path = '{}\\boxes_images\\boxed_{}'.format(output_path, ''.join([file_name, '.', ext]))
         draw_box(newBoxes, image, save_path)
 
 
@@ -144,29 +139,32 @@ parser.add_argument(
     '--path',
     dest='dataset_path',
     help='Path to dataset data ?(image and annotations).',
-    required=True
+    default='.',
+    required=False
 )
 parser.add_argument(
     '-o',
     '--output',
     dest='output_path',
     help='Path that will be saved the resized dataset',
-    default='./',
-    required=True
+    default='.',
+    required=False
 )
 parser.add_argument(
     '-x',
     '--new_x',
     dest='x',
     help='The new x images size / scale / percentage / target',
-    required=True
+    default=320,
+    required=False
 )
 parser.add_argument(
     '-y',
     '--new_y',
     dest='y',
     help='The new y images size / scale / percentage / target',
-    required=True
+    default=320,
+    required=False
 )
 
 parser.add_argument(
@@ -190,20 +188,29 @@ IMAGE_FORMATS = ('.jpeg', '.JPEG', '.png', '.PNG', '.jpg', '.JPG')
 
 args = parser.parse_args()
 
-create_path(args.output_path)
+input_path = args.dataset_path
+output_path = args.output_path
+
+if input_path is None or input_path == '.':
+    input_path = os.getcwd()
+
+if output_path is None or output_path == '.':
+    output_path = input_path
+
+
+create_path(output_path)
 if int(args.save_box_images):
-    create_path(''.join([args.output_path, '/boxes_images']))
+    create_path(os.path.join(output_path, 'boxes_images'))
 
-args.dataset_path = add_end_slash(args.dataset_path)
-args.output_path = add_end_slash(args.output_path)
 
-for root, _, files in os.walk(args.dataset_path):
-        output_path = os.path.join(args.output_path, root[len(args.dataset_path):])
-        create_path(output_path)
+for root, _, files in os.walk(input_path):
+        out_path = output_path + root[len(input_path):]
+        create_path(out_path)
 
         for file in files:
             if file.endswith(IMAGE_FORMATS):
                 file_path = os.path.join(root, file)
-                process_image(file_path, output_path, args.x, args.y, args.save_box_images, args.mode)
+                process_image(file_path, out_path, args.x, args.y, args.save_box_images, args.mode)
+
 
 print('Complete.')
