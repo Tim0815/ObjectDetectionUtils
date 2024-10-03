@@ -30,36 +30,42 @@ else:
     print('Converting ' + str(num_files) + ' files...')
 
 
+classes = []
+
 for txt_file in txt_file_list:
     the_file = open(txt_file, 'r')
     all_lines = the_file.readlines()
+    # print('Converting file ' + str(the_file.name))
     image_name = txt_file.stem
     image_dir = txt_file.parent.parent
     xml_file = os.path.join(image_dir, image_name + '.xml')
 
     # Check to see if there is an image that matches the txt file
-    if os.path.isfile(image_name + '.jpeg'):
+    if os.path.isfile(os.path.join(image_dir, image_name + '.jpeg')):
         image_name = image_name + '.jpeg'
-    if os.path.isfile(image_name + '.jpg'):
+    if os.path.isfile(os.path.join(image_dir, image_name + '.jpg')):
         image_name = image_name + '.jpg'
-    if os.path.isfile(image_name + '.png'):
+    if os.path.isfile(os.path.join(image_dir, image_name + '.png')):
         image_name = image_name + '.png'
-    if os.path.isfile(image_name + '.bmp'):
+    if os.path.isfile(os.path.join(image_dir, image_name + '.bmp')):
         image_name = image_name + '.bmp'
 
     if not image_name == txt_file.stem:
+        # print('  > Image file found: ' + str(os.path.join(image_dir, image_name)))
+
         # If the image name is the same as the yolo filename
         # then we did NOT find an image that matches, and we will skip this code block
-        orig_img = Image.open(image_name) # open the image
+        orig_img = Image.open(os.path.join(image_dir, image_name)) # open the image
         image_width = orig_img.width
         image_height = orig_img.height
 
         # Start the XML file
+        # print('  > Creating XML file: ' + xml_file)
         with open(xml_file, 'w') as f:
           f.write('<annotation>\n')
           f.write('\t<folder>XML</folder>\n')
           f.write('\t<filename>' + image_name + '</filename>\n')
-          f.write('\t<path>' + str(image_dir) + os.sep + image_name + '</path>\n')
+          f.write('\t<path>' + str(os.path.join(image_dir, image_name)) + '</path>\n')
           f.write('\t<source>\n')
           f.write('\t\t<database>Unknown</database>\n')
           f.write('\t</source>\n')
@@ -115,9 +121,12 @@ for txt_file in txt_file_list:
                   f.write('\t\t\t<ymax>' + y_max + '</ymax>\n')
                   f.write('\t\t</bndbox>\n')
                   f.write('\t</object>\n')
+                  
+                  if object_name not in classes:
+                      classes.append(object_name)
 
           # Close the annotation tag once all the objects have been written to the file
           f.write('</annotation>\n')
           f.close() # Close the file
 
-print("Complete.")
+print('Conversion complete. ' + str(len(classes)) + ' classes found during conversion: ' + str(classes))
