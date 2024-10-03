@@ -99,6 +99,7 @@ def resize(image_path,
     size_node.find('height').text = str(newSize[1])
 
     for member in xmlRoot.findall('object'):
+        member.find('name').text = member.find('name').text.lower()
         bndbox = member.find('bndbox')
 
         xmin = bndbox.find('xmin')

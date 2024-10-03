@@ -129,4 +129,4 @@ for txt_file in txt_file_list:
           f.write('</annotation>\n')
           f.close() # Close the file
 
-print('Conversion complete. ' + str(len(classes)) + ' classes found during conversion: ' + str(classes))
+print('Conversion complete. ' + str(len(classes)) + ' classes found during conversion: \n' + str(classes))

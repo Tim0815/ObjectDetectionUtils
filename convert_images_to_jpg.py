@@ -2,11 +2,27 @@ from sys import argv
 from pathlib import Path
 from PIL import Image
 import os
+import xml.etree.ElementTree as ET
+
 
 image_path = os.getcwd()
 if (len(argv) >= 2):
     image_path = argv[1]
 print('Folder: ' + image_path)
+
+
+# Update XML file if it exists:
+def updateXml(file_name):
+    folder = Path(file_name).parent
+    fn = Path(file_name).stem
+    xml_path = os.path.join(folder, fn + '.xml')
+    if os.path.isfile(xml_path):
+        xmlRoot = ET.parse(xml_path).getroot()
+        xmlRoot.find('filename').text = str(file_name)
+        for member in xmlRoot.findall('object'):
+            member.find('name').text = member.find('name').text.lower()
+        tree = ET.ElementTree(xmlRoot)
+        tree.write(xml_path)
 
 
 # Converting PNG files:
@@ -21,8 +37,10 @@ else:
         origFile = file
         im = Image.open(file)
         rgb_im = im.convert('RGB')
-        rgb_im.save(file.with_suffix('.jpg'))
+        new_name = file.with_suffix('.jpg')
+        rgb_im.save(new_name)
         os.remove(origFile)
+        updateXml(new_name)
 
 
 # Renaming JPEG files:
@@ -34,7 +52,9 @@ else:
     print('Renaming ' + str(num_files) + ' JPEG images...')
 
     for file in jpeg_file_list:
-        file.rename(file.with_suffix('.jpg'))
+        new_name = file.with_suffix('.jpg')
+        file.rename(new_name)
+        updateXml(new_name)
 
 
 print('Complete.')
