@@ -46,7 +46,7 @@ print("\nTraining starts......")
 model = object_detector.create(train_data=train_data, 
                                model_spec=spec, 
                                validation_data=validation_data, 
-                               epochs=20, 
+                               epochs=50, 
                                batch_size=4, 
                                train_whole_model=True)
 print("\nEvaluating created model")
