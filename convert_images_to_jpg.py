@@ -29,7 +29,7 @@ def updateXml(file_name):
 png_file_list = [path for path in Path(image_path).rglob('*.png')]
 num_files = len(png_file_list)
 if (num_files == 0):
-    print('No JPEG images found in folder.')
+    print('No PNG images found in folder.')
 else:
     print('Converting ' + str(num_files) + ' PNG images...')
 

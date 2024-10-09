@@ -79,6 +79,10 @@ for txt_file in txt_file_list:
           for each_line in all_lines:
               # regex to find the numbers in each line of the text file
               yolo_array = re.split("\s", each_line.rstrip()) # remove any extra space from the end of the line
+              
+              while len(yolo_array) > 5:
+                  yolo_array[0] = yolo_array[0] + '_' + yolo_array[1]
+                  del yolo_array[1]
 
               # initalize the variables
               x_yolo = 0.0
