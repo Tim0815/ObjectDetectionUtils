@@ -12,6 +12,89 @@ from tqdm.auto import tqdm
 import mimetypes
 import urllib.request
 import wget
+import errno
+import tempfile
+
+
+ERROR_INVALID_NAME = 123
+
+def is_pathname_valid(pathname: str) -> bool:
+    '''
+    `True` if the passed pathname is a valid pathname for the current OS;
+    `False` otherwise.
+    '''
+    try:
+        if not isinstance(pathname, str) or not pathname:
+            return False
+
+        _, pathname = os.path.splitdrive(pathname)
+        root_dirname = os.environ.get('HOMEDRIVE', 'C:') \
+            if sys.platform == 'win32' else os.path.sep
+        assert os.path.isdir(root_dirname)
+        root_dirname = root_dirname.rstrip(os.path.sep) + os.path.sep
+        for pathname_part in pathname.split(os.path.sep):
+            try:
+                os.lstat(root_dirname + pathname_part)
+            except OSError as exc:
+                if hasattr(exc, 'winerror'):
+                    if exc.winerror == ERROR_INVALID_NAME:
+                        return False
+                elif exc.errno in {errno.ENAMETOOLONG, errno.ERANGE}:
+                    return False
+    except TypeError as exc:
+        return False
+    else:
+        return True
+
+def is_path_creatable(pathname: str) -> bool:
+    '''
+    `True` if the current user has sufficient permissions to create the passed
+    pathname; `False` otherwise.
+    '''
+    dirname = os.path.dirname(pathname) or os.getcwd()
+    return os.access(dirname, os.W_OK)
+
+def is_path_exists_or_creatable(pathname: str) -> bool:
+    '''
+    `True` if the passed pathname is a valid pathname for the current OS _and_
+    either currently exists or is hypothetically creatable; `False` otherwise.
+
+    This function is guaranteed to _never_ raise exceptions.
+    '''
+    try:
+        return is_pathname_valid(pathname) and (
+            os.path.exists(pathname) or is_path_creatable(pathname))
+    except OSError:
+        return False
+
+def is_path_sibling_creatable(pathname: str) -> bool:
+    '''
+    `True` if the current user has sufficient permissions to create **siblings**
+    (i.e., arbitrary files in the parent directory) of the passed pathname;
+    `False` otherwise.
+    '''
+    dirname = os.path.dirname(pathname) or os.getcwd()
+
+    try:
+        with tempfile.TemporaryFile(dir=dirname): pass
+        return True
+    except EnvironmentError:
+        return False
+
+def is_path_exists_or_creatable_portable(pathname: str) -> bool:
+    '''
+    `True` if the passed pathname is a valid pathname on the current OS _and_
+    either currently exists or is hypothetically creatable in a cross-platform
+    manner optimized for POSIX-unfriendly filesystems; `False` otherwise.
+
+    This function is guaranteed to _never_ raise exceptions.
+    '''
+    try:
+        return is_pathname_valid(pathname) and (
+            os.path.exists(pathname) or is_path_sibling_creatable(pathname))
+    except OSError:
+        return False
+
 
 
 def getExtFromMimetype(url):
@@ -120,8 +203,8 @@ parser.add_argument(
     '--query',
     dest='query',
     help='The query string.',
-    default='capuchin monkey',
-    required=False
+    default='',
+    required=True
 )
 parser.add_argument(
     '-o',
@@ -143,8 +226,10 @@ parser.add_argument(
 args = parser.parse_args()
 
 query = args.query
-output_path = os.path.join(os.path.join(os.getcwd(), args.output_path), '')
-file_limit = args.file_limit
+output_path = os.path.join(args.output_path, '')
+if (not ':' in output_path):
+    output_path = os.path.join(os.getcwd(), output_path)
+file_limit = int(args.file_limit)
 
 if query is None or query.strip() == '':
     print('Error: A search query must be defined.')
@@ -155,8 +240,7 @@ else:
     print('\nStarting download with following parameters:')
     print('    Query  = ' + query)
     print('    Output = ' + output_path)
-    print('    Limit  = ' + file_limit + '\n')
-    file_limit = int(file_limit)
+    print('    Limit  = ' + str(file_limit) + '\n')
 
     results = DDGS().images(
         keywords=query,
