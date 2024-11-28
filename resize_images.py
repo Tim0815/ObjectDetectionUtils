@@ -6,6 +6,7 @@ import numpy as np
 import xml.etree.ElementTree as ET
 from math import floor
 from pathlib import Path
+from PIL import Image
 
 
 def create_path(path):
@@ -55,35 +56,37 @@ def resize(image_path,
 
     (base_dir, file_name, ext) = get_file_name(image_path)
     image = cv2.imread(image_path)
+    imgW = float(image.shape[1])
+    imgH = float(image.shape[0])
+    newW = float(newSize[0])
+    newH = float(newSize[1])
+    scale_x = newW / imgW
+    scale_y = newH / imgH
 
     mode = mode and mode.lower()
     # Standard resize mode
     if mode is None or mode == 'size':
         newSize = (int(newSize[0]), int(newSize[1]))
-        scale_x = float(newSize[0]) / float(image.shape[1])
-        scale_y = float(newSize[1]) / float(image.shape[0])
         image = cv2.resize(src=image, dsize=(newSize[0], newSize[1]))
     else:
         # Scaling by factor or percentage of the original image size
-        if mode == 'scale' or mode == 'percentage':
-            mul = 0.01 if mode == 'percentage' else 1.0
-            newSize = (
-                floor(float(image.shape[1]) * float(newSize[0]) * mul),
-                floor(float(image.shape[0]) * float(newSize[1]) * mul))
-            scale_x = newSize[0] / image.shape[1]
-            scale_y = newSize[1] / image.shape[0]
-            interp = cv2.INTER_LINEAR if (scale_x > 1.0 or scale_y > 1.0) else cv2.INTER_AREA
+        if mode == 'scale':
+            if scale_y > scale_x:
+                scale_x = scale_y
+            else:
+                scale_y = scale_x
+            interp = cv2.INTER_LINEAR if (scale_x > 1.0) else cv2.INTER_AREA
             image = cv2.resize(
                 src=image,
                 dsize=(0, 0), dst=None,
                 fx=scale_x, fy=scale_y, interpolation=interp)
         # Target mode; choose the correct ratio to reach one of the x/y targets without oversize
         elif mode == 'target':
-            ratio = float(int(newSize[0])) / float(image.shape[1])
-            targetRatio = float(int(newSize[1])) / float(image.shape[0])
-            ratio = targetRatio if targetRatio < ratio else ratio
-            scale_x = scale_y = ratio
-            interp = cv2.INTER_LINEAR if (scale_x > 1.0 or scale_y > 1.0) else cv2.INTER_AREA
+            if scale_y < scale_x:
+                scale_x = scale_y
+            else:
+                scale_y = scale_x
+            interp = cv2.INTER_LINEAR if (scale_x > 1.0) else cv2.INTER_AREA
             image = cv2.resize(
                 src=image,
                 dsize=(0, 0), dst=None,
@@ -133,6 +136,26 @@ def resize(image_path,
 
 
 
+IMAGE_FORMATS = ('.jpeg', '.JPEG', '.png', '.PNG', '.jpg', '.JPG')
+
+def resize_all(inPath, outPath, x, y, save_box_images = 0, mode = 'size'):
+    create_path(outPath)
+    if int(save_box_images):
+        create_path(os.path.join(outPath, 'boxes_images'))
+
+    for root, _, files in os.walk(inPath):
+            out_path = outPath + root[len(inPath):]
+            create_path(out_path)
+
+            for file in files:
+                if file.endswith(IMAGE_FORMATS):
+                    file_path = os.path.join(root, file)
+                    process_image(file_path, out_path, x, y, save_box_images, mode)
+    print('Complete.')
+
+
+
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
@@ -155,7 +178,7 @@ parser.add_argument(
     '-x',
     '--new_x',
     dest='x',
-    help='The new x images size / scale / percentage / target',
+    help='The new x images size',
     default=320,
     required=False
 )
@@ -163,19 +186,17 @@ parser.add_argument(
     '-y',
     '--new_y',
     dest='y',
-    help='The new y images size / scale / percentage / target',
+    help='The new y images size',
     default=320,
     required=False
 )
-
 parser.add_argument(
     '-m',
     '--mode',
     dest='mode',
-    help='Resize mode: size, scale, percentage or target',
+    help='Resize mode: size, scale, or target',
     required=False
 )
-
 parser.add_argument(
     '-s',
     '--save_box_images',
@@ -185,7 +206,6 @@ parser.add_argument(
 )
 
 
-IMAGE_FORMATS = ('.jpeg', '.JPEG', '.png', '.PNG', '.jpg', '.JPG')
 
 args = parser.parse_args()
 
@@ -198,20 +218,4 @@ if input_path is None or input_path == '.':
 if output_path is None or output_path == '.':
     output_path = input_path
 
-
-create_path(output_path)
-if int(args.save_box_images):
-    create_path(os.path.join(output_path, 'boxes_images'))
-
-
-for root, _, files in os.walk(input_path):
-        out_path = output_path + root[len(input_path):]
-        create_path(out_path)
-
-        for file in files:
-            if file.endswith(IMAGE_FORMATS):
-                file_path = os.path.join(root, file)
-                process_image(file_path, out_path, args.x, args.y, args.save_box_images, args.mode)
-
-
-print('Complete.')
+resize_all(input_path, output_path, args.x, args.y, args.save_box_images, args.mode)
