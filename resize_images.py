@@ -4,6 +4,7 @@ from optparse import OptionParser
 import cv2
 import numpy as np
 import xml.etree.ElementTree as ET
+import copy
 from math import floor
 from pathlib import Path
 from PIL import Image
@@ -14,6 +15,10 @@ def create_path(path):
     path.mkdir(parents=True, exist_ok=True)
 
 
+def clamp(number, _min, _max):
+    return max(_min, min(_max, number))
+
+
 def get_file_name(path):
     base_dir = os.path.dirname(path)
     file_name, ext = os.path.splitext(os.path.basename(path))
@@ -21,128 +26,125 @@ def get_file_name(path):
     return (base_dir, file_name, ext)
 
 
-def process_image(file_path, output_path, x, y, save_box_images, mode):
+def process_image(file_path, output_path, x, y, mode):
     (base_dir, file_name, ext) = get_file_name(file_path)
     # image_path = os.path.join(base_dir, file_name + '.' + ext)
     xml = os.path.join(base_dir, file_name + '.xml')
     try:
-        resize(
-            file_path,
-            xml,
-            (x, y),
-            output_path,
-            mode,
-            save_box_images=save_box_images
-        )
+        resize(file_path, xml, (x, y), output_path, mode)
     except Exception as e:
         print('[ERROR] error with {}\n file: {}'.format(file_path, e))
         print('--------------------------------------------------')
 
 
-def draw_box(boxes, image, path):
-    for i in range(0, len(boxes)):
-        cv2.rectangle(image, (boxes[i][2], boxes[i][3]), (boxes[i][4], boxes[i][5]), (255, 0, 0), 1)
-    cv2.imwrite(path, image)
-
-
-def resize(image_path,
-           xml_path,
-           newSize,
-           output_path,
-           mode,
-           save_box_images=False,
-           verbose=False
-           ):
-
+def resize(image_path, xml_path, newSize, output_path, mode):
     (base_dir, file_name, ext) = get_file_name(image_path)
     image = cv2.imread(image_path)
+    xmlRoot = ET.parse(xml_path).getroot()
+
     imgW = float(image.shape[1])
     imgH = float(image.shape[0])
     newW = float(newSize[0])
     newH = float(newSize[1])
-    scale_x = newW / imgW
-    scale_y = newH / imgH
+    scaleX = newW / imgW
+    scaleY = newH / imgH
 
     mode = mode and mode.lower()
     # Standard resize mode
     if mode is None or mode == 'size':
-        newSize = (int(newSize[0]), int(newSize[1]))
-        image = cv2.resize(src=image, dsize=(newSize[0], newSize[1]))
+        resize_and_save_internal(image, xmlRoot, file_name, ext, int(newW), int(newH), scaleX, scaleY, 0, 0, output_path)
     else:
-        # Scaling by factor or percentage of the original image size
+        # Scaling mode: choose the correct scale to reach one of the x/y targets without undersize
         if mode == 'scale':
-            if scale_y > scale_x:
-                scale_x = scale_y
+            if scaleY > scaleX:
+                scaleX = scaleY
+                newW = scaleX * imgW
             else:
-                scale_y = scale_x
-            interp = cv2.INTER_LINEAR if (scale_x > 1.0) else cv2.INTER_AREA
-            image = cv2.resize(
-                src=image,
-                dsize=(0, 0), dst=None,
-                fx=scale_x, fy=scale_y, interpolation=interp)
-        # Target mode; choose the correct ratio to reach one of the x/y targets without oversize
+                scaleY = scaleX
+                newH = scaleY * imgH
+            resize_and_save_internal(image, xmlRoot, file_name, ext, int(newW), int(newH), scaleX, scaleY, 0, 0, output_path)
+        # Target mode: choose the correct scale to reach one of the x/y targets without oversize
         elif mode == 'target':
-            if scale_y < scale_x:
-                scale_x = scale_y
+            if scaleY < scaleX:
+                scaleX = scaleY
+                newW = scaleX * imgW
             else:
-                scale_y = scale_x
-            interp = cv2.INTER_LINEAR if (scale_x > 1.0) else cv2.INTER_AREA
-            image = cv2.resize(
-                src=image,
-                dsize=(0, 0), dst=None,
-                fx=scale_x, fy=scale_y, interpolation=interp)
+                scaleY = scaleX
+                newH = scaleY * imgH
+            resize_and_save_internal(image, xmlRoot, file_name, ext, int(newW), int(newH), scaleX, scaleY, 0, 0, output_path)
+        # Crop mode: first, scale down to reach larger x/y edge size without undersize, afterwards check if crop is needed and split the image into parts
+        elif mode == 'crop':
+            if scaleY > scaleX:
+                scaleX = scaleY
+                tX = int(scaleX * imgW - newW)
+                resize_and_save_internal(image, xmlRoot, file_name + '_1', ext, int(newW), int(newH), scaleX, scaleY, tX, 0, output_path)
+                resize_and_save_internal(image, xmlRoot, file_name, ext, int(newW), int(newH), scaleX, scaleY, 0, 0, output_path)
+            else:
+                scaleY = scaleX
+                tY = int(scaleY * imgH - newH)
+                resize_and_save_internal(image, xmlRoot, file_name + '_1', ext, int(newW), int(newH), scaleX, scaleY, 0, tY, output_path)
+                resize_and_save_internal(image, xmlRoot, file_name, ext, int(newW), int(newH), scaleX, scaleY, 0, 0, output_path)
         else:
             raise Exception(f"Invalid resize mode: {mode}")
 
-    newBoxes = []
-    xmlRoot = ET.parse(xml_path).getroot()
+
+def resize_and_save_internal(image, origXmlRoot, file_name, ext, newW, newH, scaleX, scaleY, tX, tY, output_path):
+    interp = cv2.INTER_LINEAR if (scaleX * scaleY > 1.0) else cv2.INTER_AREA
+    image = cv2.resize(src=image, dsize=(0, 0), dst=None, fx=scaleX, fy=scaleY, interpolation=interp)
+    # image = cv2.resize(src=image, dsize=(newW, newH))
+    imgW = image.shape[1]
+    imgH = image.shape[0]
+    if (imgW != newW or tX > 0 or imgH != newH or tY > 0):
+        image = image[tY:newH+tY, tX:newW+tX]
+
+    xmlRoot = copy.deepcopy(origXmlRoot)
     xmlRoot.find('filename').text = str(file_name + '.' + ext)
+    xmlRoot.find('path').text = str(output_path)
+
     size_node = xmlRoot.find('size')
-    size_node.find('width').text = str(newSize[0])
-    size_node.find('height').text = str(newSize[1])
+    size_node.find('width').text = str(newW)
+    size_node.find('height').text = str(newH)
 
-    for member in xmlRoot.findall('object'):
-        member.find('name').text = member.find('name').text.lower()
-        bndbox = member.find('bndbox')
+    for xmlObject in xmlRoot.findall('object'):
+        name = xmlObject.find('name')
+        name.text = name.text.lower()
 
+        bndbox = xmlObject.find('bndbox')
         xmin = bndbox.find('xmin')
         ymin = bndbox.find('ymin')
         xmax = bndbox.find('xmax')
         ymax = bndbox.find('ymax')
         
-        xmin.text = str(int(np.round(float(xmin.text) * scale_x)))
-        ymin.text = str(int(np.round(float(ymin.text) * scale_y)))
-        xmax.text = str(int(np.round(float(xmax.text) * scale_x)))
-        ymax.text = str(int(np.round(float(ymax.text) * scale_y)))
+        xminFloat = float(xmin.text)
+        yminFloat = float(ymin.text)
+        xmaxFloat = float(xmax.text)
+        ymaxFloat = float(ymax.text)
 
-        newBoxes.append([
-            1,
-            0,
-            int(float(xmin.text)),
-            int(float(ymin.text)),
-            int(float(xmax.text)),
-            int(float(ymax.text))
-            ])
+        xminInt = clamp(int(np.round(xminFloat * scaleX)) - tX, 0, newW)
+        yminInt = clamp(int(np.round(yminFloat * scaleY)) - tY, 0, newH)
+        xmaxInt = clamp(int(np.round(xmaxFloat * scaleX)) - tX, 0, newW)
+        ymaxInt = clamp(int(np.round(ymaxFloat * scaleY)) - tY, 0, newH)
+        
+        if (xminInt == newW or xmaxInt == 0 or yminInt == newH or ymaxInt == 0):
+            xmlRoot.remove(xmlObject)
+        else:
+            xmin.text = str(xminInt)
+            ymin.text = str(yminInt)
+            xmax.text = str(xmaxInt)
+            ymax.text = str(ymaxInt)
 
-    new_img_file_name = os.path.join(output_path, file_name + '.' + ext)
-    cv2.imwrite(new_img_file_name, image)
+    cv2.imwrite(os.path.join(output_path, file_name + '.' + ext), image)
 
     tree = ET.ElementTree(xmlRoot)
     tree.write(os.path.join(output_path, file_name + '.xml'))
-    if int(save_box_images):
-        save_path = '{}\\boxes_images\\boxed_{}'.format(output_path, ''.join([file_name, '.', ext]))
-        draw_box(newBoxes, image, save_path)
 
 
 
 
 IMAGE_FORMATS = ('.jpeg', '.JPEG', '.png', '.PNG', '.jpg', '.JPG')
 
-def resize_all(inPath, outPath, x, y, save_box_images = 0, mode = 'size'):
+def resize_all(inPath, outPath, x, y, mode = 'size'):
     create_path(outPath)
-    if int(save_box_images):
-        create_path(os.path.join(outPath, 'boxes_images'))
-
     for root, _, files in os.walk(inPath):
             out_path = outPath + root[len(inPath):]
             create_path(out_path)
@@ -150,7 +152,7 @@ def resize_all(inPath, outPath, x, y, save_box_images = 0, mode = 'size'):
             for file in files:
                 if file.endswith(IMAGE_FORMATS):
                     file_path = os.path.join(root, file)
-                    process_image(file_path, out_path, x, y, save_box_images, mode)
+                    process_image(file_path, out_path, x, y, mode)
     print('Complete.')
 
 
@@ -162,7 +164,7 @@ parser.add_argument(
     '-p',
     '--path',
     dest='dataset_path',
-    help='Path to dataset data ?(image and annotations).',
+    help='Path to dataset (images and annotations)',
     default='.',
     required=False
 )
@@ -170,7 +172,7 @@ parser.add_argument(
     '-o',
     '--output',
     dest='output_path',
-    help='Path that will be saved the resized dataset',
+    help='Output path for resized dataset (might be left empty, then the input will be overwritten)',
     default='.',
     required=False
 )
@@ -194,15 +196,8 @@ parser.add_argument(
     '-m',
     '--mode',
     dest='mode',
-    help='Resize mode: size, scale, or target',
+    help='Resize mode: size, scale, target, or crop',
     required=False
-)
-parser.add_argument(
-    '-s',
-    '--save_box_images',
-    dest='save_box_images',
-    help='If True, it will save the resized image and a drawed image with the boxes in the images',
-    default=0
 )
 
 
@@ -218,4 +213,4 @@ if input_path is None or input_path == '.':
 if output_path is None or output_path == '.':
     output_path = input_path
 
-resize_all(input_path, output_path, args.x, args.y, args.save_box_images, args.mode)
+resize_all(input_path, output_path, args.x, args.y, args.mode)
