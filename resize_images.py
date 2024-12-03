@@ -79,10 +79,12 @@ def resize(image_path, xml_path, newSize, output_path, mode):
                 tX = int(scaleX * imgW - newW)
                 resize_and_save_internal(image, xmlRoot, file_name + '_1', ext, int(newW), int(newH), scaleX, scaleY, tX, 0, output_path)
                 resize_and_save_internal(image, xmlRoot, file_name, ext, int(newW), int(newH), scaleX, scaleY, 0, 0, output_path)
-            else:
+            elif scaleX > scaleY:
                 scaleY = scaleX
                 tY = int(scaleY * imgH - newH)
                 resize_and_save_internal(image, xmlRoot, file_name + '_1', ext, int(newW), int(newH), scaleX, scaleY, 0, tY, output_path)
+                resize_and_save_internal(image, xmlRoot, file_name, ext, int(newW), int(newH), scaleX, scaleY, 0, 0, output_path)
+            else:
                 resize_and_save_internal(image, xmlRoot, file_name, ext, int(newW), int(newH), scaleX, scaleY, 0, 0, output_path)
         else:
             raise Exception(f"Invalid resize mode: {mode}")
