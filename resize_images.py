@@ -101,7 +101,7 @@ def resize_and_save_internal(image, origXmlRoot, file_name, ext, newW, newH, sca
 
     xmlRoot = copy.deepcopy(origXmlRoot)
     xmlRoot.find('filename').text = str(file_name + '.' + ext)
-    xmlRoot.find('path').text = str(output_path)
+    xmlRoot.find('path').text = str(os.path.join(output_path, file_name + '.' + ext))
 
     size_node = xmlRoot.find('size')
     size_node.find('width').text = str(newW)
