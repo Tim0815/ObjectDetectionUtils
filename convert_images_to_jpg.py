@@ -18,7 +18,8 @@ def updateXml(file_name):
     xml_path = os.path.join(folder, fn + '.xml')
     if os.path.isfile(xml_path):
         xmlRoot = ET.parse(xml_path).getroot()
-        xmlRoot.find('filename').text = str(file_name)
+        xmlRoot.find('filename').text = str(fn + '.jpg')
+        xmlRoot.find('path').text = str(file_name)
         for member in xmlRoot.findall('object'):
             member.find('name').text = member.find('name').text.lower()
         tree = ET.ElementTree(xmlRoot)
