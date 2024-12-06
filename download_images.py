@@ -1,17 +1,14 @@
 from duckduckgo_search import DDGS
-import os
+import os, sys
 import argparse
 from pathlib import Path
-import io
 import uuid
 import requests
-from PIL import Image
 import joblib
 import contextlib
 from tqdm.auto import tqdm
 import mimetypes
 import urllib.request
-import wget
 import errno
 import tempfile
 

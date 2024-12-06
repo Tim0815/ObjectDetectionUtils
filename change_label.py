@@ -1,8 +1,5 @@
 import os
 import argparse
-from optparse import OptionParser
-import cv2
-import numpy as np
 import xml.etree.ElementTree as ET
 from math import floor
 from pathlib import Path

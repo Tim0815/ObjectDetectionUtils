@@ -14,7 +14,7 @@ classes = []
 updates = 0
 
 
-# Check XML file if it exists:
+# Check XML file:
 def checkXml(xml_path):
     global updates
     xmlRoot = ET.parse(xml_path).getroot()
@@ -32,7 +32,7 @@ def checkXml(xml_path):
             classes.append(object_name)
 
 
-# Converting PNG files:
+# Find and process all XML files:
 xml_file_list = [path for path in Path(images_path).rglob('*.xml')]
 num_files = len(xml_file_list)
 if (num_files == 0):
