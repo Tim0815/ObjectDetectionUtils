@@ -103,16 +103,20 @@ for txt_file in txt_file_list:
                   yolo_height = float(yolo_array[4])
 
                   # Convert Yolo Format to Pascal VOC format
-                  # box_width = yolo_width * image_width
-                  # box_height = yolo_height * image_height
-                  # x_min = str(int(x_yolo * image_width - (box_width / 2)))
-                  # y_min = str(int(y_yolo * image_height - (box_height / 2)))
-                  # x_max = str(int(x_yolo * image_width + (box_width / 2)))
-                  # y_max = str(int(y_yolo * image_height + (box_height / 2)))
-                  x_min = str(round(x_yolo))
-                  y_min = str(round(y_yolo))
-                  x_max = str(round(yolo_width))
-                  y_max = str(round(yolo_height))
+                  if (x_yolo <= 1.0 and y_yolo <= 1.0 and yolo_width <= 1.0 and yolo_height <= 1.0):
+                    x_min = str(round(x_yolo))
+                    y_min = str(round(y_yolo))
+                    x_max = str(round(yolo_width))
+                    y_max = str(round(yolo_height))
+                  else:
+                    half_box_width = yolo_width * image_width / 2
+                    half_box_height = yolo_height * image_height / 2
+                    x_yolo_scaled = x_yolo * image_width
+                    y_yolo_scaled = y_yolo * image_height
+                    x_min = str(int(x_yolo_scaled - half_box_width))
+                    y_min = str(int(y_yolo_scaled - half_box_height))
+                    x_max = str(int(x_yolo_scaled + half_box_width))
+                    y_max = str(int(y_yolo_scaled + half_box_height))
 
                   # write each object to the file
                   f.write('\t<object>\n')
