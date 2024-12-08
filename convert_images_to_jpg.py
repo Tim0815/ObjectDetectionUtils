@@ -35,13 +35,16 @@ else:
     print('Converting ' + str(num_files) + ' PNG images...')
 
     for file in png_file_list:
-        origFile = file
-        im = Image.open(file)
-        rgb_im = im.convert('RGB')
-        new_name = file.with_suffix('.jpg')
-        rgb_im.save(new_name)
-        os.remove(origFile)
-        updateXml(new_name)
+        try:
+            origFile = file
+            im = Image.open(file)
+            rgb_im = im.convert('RGB')
+            new_name = file.with_suffix('.jpg')
+            rgb_im.save(new_name)
+            os.remove(origFile)
+            updateXml(new_name)
+        except:
+            print(f'Error with file {file}')
 
 
 # Renaming JPEG files:

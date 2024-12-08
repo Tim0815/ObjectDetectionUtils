@@ -20,7 +20,7 @@ def rename_image(image_file_path):
     file = Path(image_file_path)
     folder = file.parent
     filename = file.stem
-    ext = file.suffix
+    ext = file.suffix.removeprefix('.')
     newFileName = str(uuid.uuid4().hex)
     newFileNameWithExtension = newFileName + '.' + ext
     newImageFilePath = os.path.join(folder, newFileNameWithExtension)
