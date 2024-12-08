@@ -94,7 +94,9 @@ for txt_file in txt_file_list:
               # make sure the array has the correct number of items
               if len(yolo_array) == 5:
                   # assign the variables
-                  object_name = yolo_array[0].lower()
+                  object_name = str(yolo_array[0]).lower()
+                  if (len(object_name) < 2):
+                    object_name = image_dir.name.lower()
                   x_yolo = float(yolo_array[1])
                   y_yolo = float(yolo_array[2])
                   yolo_width = float(yolo_array[3])
