@@ -84,13 +84,6 @@ for txt_file in txt_file_list:
                   yolo_array[0] = yolo_array[0] + '_' + yolo_array[1]
                   del yolo_array[1]
 
-              # initalize the variables
-              x_yolo = 0.0
-              y_yolo = 0.0
-              yolo_width = 0.0
-              yolo_height = 0.0
-              yolo_array_contains_only_digits = True
-
               # make sure the array has the correct number of items
               if len(yolo_array) == 5:
                   # assign the variables
@@ -104,11 +97,6 @@ for txt_file in txt_file_list:
 
                   # Convert Yolo Format to Pascal VOC format
                   if (x_yolo <= 1.0 and y_yolo <= 1.0 and yolo_width <= 1.0 and yolo_height <= 1.0):
-                    x_min = str(round(x_yolo))
-                    y_min = str(round(y_yolo))
-                    x_max = str(round(yolo_width))
-                    y_max = str(round(yolo_height))
-                  else:
                     half_box_width = yolo_width * image_width / 2
                     half_box_height = yolo_height * image_height / 2
                     x_yolo_scaled = x_yolo * image_width
@@ -117,6 +105,11 @@ for txt_file in txt_file_list:
                     y_min = str(int(y_yolo_scaled - half_box_height))
                     x_max = str(int(x_yolo_scaled + half_box_width))
                     y_max = str(int(y_yolo_scaled + half_box_height))
+                  else:
+                    x_min = str(round(x_yolo))
+                    y_min = str(round(y_yolo))
+                    x_max = str(round(yolo_width))
+                    y_max = str(round(yolo_height))
 
                   # write each object to the file
                   f.write('\t<object>\n')
