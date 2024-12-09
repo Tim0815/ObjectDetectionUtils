@@ -1,3 +1,39 @@
+"""
+Beschreibung:
+Dieses Skript konvertiert YOLO-Annotationen (.txt-Dateien) in das Pascal VOC-Format (.xml-Dateien). 
+Das Pascal VOC-Format ist ein häufig verwendetes Format für maschinelles Lernen und Computer-Vision-Anwendungen, 
+insbesondere für Objekterkennung und Bildsegmentierung.
+
+Funktionsweise:
+- Das Skript durchsucht ein angegebenes Verzeichnis (standardmäßig das aktuelle Arbeitsverzeichnis) 
+  nach .txt-Dateien mit YOLO-Annotationen.
+- Es prüft, ob zu jeder .txt-Datei ein passendes Bild (JPEG, JPG, PNG oder BMP) existiert.
+- Es konvertiert die YOLO-Formatkoordinaten (`class_name`, `x_yolo`, `y_yolo`, `yolo_width`, `yolo_height`) 
+  in das Pascal VOC-Format (`xmin`, `ymin`, `xmax`, `ymax`) und erstellt entsprechende .xml-Dateien.
+
+Verwendung:
+1. Stelle sicher, dass die benötigten Bibliotheken installiert sind (z. B. Pillow für Bildverarbeitung).
+2. Platziere die YOLO-Annotationsdateien und die zugehörigen Bilder in einem Ordner.
+3. Führe das Skript aus:
+   - Ohne Argument: Das Skript arbeitet im aktuellen Verzeichnis.
+   - Mit Argument: Übergib das Zielverzeichnis als Parameter. Beispiel:
+     python convert_yolo_to_voc.py /pfad/zum/verzeichnis
+
+Ausgabe:
+- Für jede .txt-Datei wird eine entsprechende .xml-Datei im Pascal VOC-Format erstellt.
+- Am Ende gibt das Skript eine Liste der während der Konvertierung gefundenen Klassen aus.
+
+Hinweise:
+- Das Skript geht davon aus, dass die Bilder und die .txt-Dateien in derselben Verzeichnisstruktur liegen.
+- Es wird eine Fehlerprüfung durchgeführt, um ungültige Werte zu vermeiden.
+
+Abhängigkeiten:
+- Python 3.x
+- Pillow (Installierbar via `pip install pillow`)
+
+"""
+
+
 from sys import argv
 from pathlib import Path
 import os

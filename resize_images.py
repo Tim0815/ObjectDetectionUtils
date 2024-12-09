@@ -1,3 +1,53 @@
+"""
+Script Name: resize_images_and_annotations.py
+Author: [Dein Name oder leer lassen]
+Created: [Datum hier einfügen]
+
+Beschreibung:
+Dieses Skript skaliert Bilder und deren zugehörige XML-Annotationsdateien (im Pascal VOC-Format) auf eine neue Größe.
+Es unterstützt verschiedene Skaliermodi (Standardgröße, Skalierung, Zielgröße und Zuschneiden) und speichert die neuen Bilder sowie die aktualisierten XML-Dateien im angegebenen Zielverzeichnis.
+
+Funktionsweise:
+1. Das Skript durchsucht das angegebene Verzeichnis nach Bilddateien (JPEG, PNG, JPG) und den entsprechenden XML-Annotationsdateien.
+2. Es liest die Bilder ein und skaliert sie auf die angegebene Größe. Je nach Modus wird die Skalierung angepasst:
+   - **Größe**: Das Bild wird auf die exakte angegebene Größe skaliert.
+   - **Skalierung**: Das Bild wird so skaliert, dass es in eine der angegebenen Dimensionen passt, wobei das Seitenverhältnis beibehalten wird.
+   - **Zielgröße**: Das Bild wird skaliert, um eine der Dimensionen zu erreichen, wobei die andere Dimension nicht überschritten wird.
+   - **Zuschneiden**: Das Bild wird skaliert, um die größere Dimension auf die Zielgröße zu bringen, und danach wird das Bild auf die Zielgröße zugeschnitten.
+3. Die zugehörigen XML-Dateien werden ebenfalls aktualisiert, um die neuen Bildgrößen und die angepassten Bounding-Box-Koordinaten widerzuspiegeln.
+
+Verwendung:
+1. Stelle sicher, dass die benötigten Bibliotheken installiert sind:
+   - OpenCV (`cv2`) für die Bildbearbeitung
+   - `xml.etree.ElementTree` für das Verarbeiten von XML-Dateien
+   - NumPy für mathematische Operationen
+2. Führe das Skript aus:
+   - `-p` oder `--path`: (Optional) Das Verzeichnis, das die Bild- und XML-Dateien enthält. Standardmäßig wird das aktuelle Verzeichnis verwendet.
+   - `-o` oder `--output`: (Optional) Das Zielverzeichnis, in das die skalierten Bilder und XML-Dateien gespeichert werden. Wenn nicht angegeben, wird das Eingabeverzeichnis überschrieben.
+   - `-x` oder `--new_x`: (Optional) Die neue Breite der Bilder (Standard: 320).
+   - `-y` oder `--new_y`: (Optional) Die neue Höhe der Bilder (Standard: 320).
+   - `-m` oder `--mode`: (Optional) Der Skalierungsmodus. Mögliche Werte: `size`, `scale`, `target`, `crop` (Standard: `size`).
+
+   Beispiel:
+   python resize_images_and_annotations.py -p "/pfad/zum/dataset" -o "/pfad/zum/ausgabeverzeichnis" -x 480 -y 640 -m crop
+
+Ausgabe:
+- Das Skript skaliert alle Bilder und speichert sie zusammen mit den aktualisierten XML-Dateien im angegebenen Zielverzeichnis.
+
+Hinweise:
+- Es werden nur Bilddateien mit den Erweiterungen .jpeg, .jpg, .png und .JPG verarbeitet.
+- Die XML-Dateien müssen im Pascal VOC-Format vorliegen.
+- Der Modus crop führt zu einem Bildzuschnitt, falls erforderlich, um die Zielgröße zu erreichen.
+
+Abhängigkeiten:
+- Python 3.x
+- OpenCV (cv2)
+- NumPy
+- xml.etree.ElementTree (In Python integriert)
+
+"""
+
+
 import os
 import argparse
 from optparse import OptionParser

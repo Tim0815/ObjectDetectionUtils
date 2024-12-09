@@ -1,3 +1,38 @@
+"""
+Beschreibung:
+Dieses Skript benennt Bilddateien in einem Verzeichnis rekursiv um, indem es jedem Bild einen zufälligen eindeutigen Dateinamen (UUID) zuweist. 
+Falls zu einer Bilddatei eine XML-Annotationsdatei im Pascal VOC-Format existiert, wird diese aktualisiert, um den neuen Bilddateinamen und -pfad widerzuspiegeln.
+
+Funktionsweise:
+1. Das Skript durchsucht ein angegebenes Verzeichnis (standardmäßig das aktuelle Arbeitsverzeichnis) rekursiv nach Bilddateien in unterstützten Formaten (JPEG, PNG, JPG).
+2. Jede gefundene Bilddatei wird in dasselbe Verzeichnis mit einem zufälligen UUID-basierten Dateinamen umbenannt.
+3. Falls eine XML-Datei mit gleichem Namen wie die ursprüngliche Bilddatei existiert:
+   - Wird der Bildname und -pfad in der XML-Datei entsprechend aktualisiert.
+   - Die XML-Datei selbst wird ebenfalls umbenannt, sodass sie den neuen Bildnamen widerspiegelt.
+
+Verwendung:
+1. Stelle sicher, dass die benötigten Bibliotheken installiert sind (z. B. `xml.etree.ElementTree` ist in Python integriert).
+2. Platziere die Bild- und XML-Dateien in einem Ordner.
+3. Führe das Skript aus:
+   - Ohne Argument: Das Skript arbeitet im aktuellen Verzeichnis.
+   - Mit Argument: Übergib das Zielverzeichnis als Parameter. Beispiel:
+     python rename_images_and_update_xml.py /pfad/zum/verzeichnis
+
+Ausgabe:
+- Die Bilddateien werden umbenannt, und ihre zugehörigen XML-Dateien werden aktualisiert.
+- Am Ende wird die Anzahl der umbenannten Bilder ausgegeben.
+
+Hinweise:
+- Das Skript verarbeitet nur Bilddateien mit den Formaten `.jpeg`, `.jpg`, `.png` (Groß-/Kleinschreibung wird berücksichtigt).
+- Es prüft, ob ein neuer Dateiname bereits existiert, bevor er verwendet wird, um Konflikte zu vermeiden.
+
+Abhängigkeiten:
+- Python 3.x
+- uuid (In Python integriert)
+
+"""
+
+
 from sys import argv
 import os
 from pathlib import Path

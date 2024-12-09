@@ -1,3 +1,38 @@
+"""
+Beschreibung:
+Dieses Skript gruppiert XML-Annotationsdateien (im Pascal VOC-Format) und zugehörige Bilddateien nach den in den Annotationen enthaltenen Klassen. 
+Die Dateien werden in Verzeichnisse verschoben, die nach den Klassennamen benannt sind.
+
+Funktionsweise:
+1. Das Skript durchsucht ein angegebenes Verzeichnis (standardmäßig das aktuelle Arbeitsverzeichnis) nach XML-Annotationsdateien.
+2. Jede XML-Datei wird analysiert, um die enthaltenen Klassen zu bestimmen.
+3. Falls eine Datei nur eine Klasse enthält, werden die XML-Datei und die zugehörige Bilddatei in ein neues Unterverzeichnis verschoben, 
+   das nach der Klasse benannt ist.
+4. Die XML-Datei wird entsprechend aktualisiert, um den neuen Speicherort der Bilddatei zu reflektieren.
+5. Dateien mit mehreren Klassen werden übersprungen, und eine Meldung wird ausgegeben.
+
+Verwendung:
+1. Stelle sicher, dass die benötigten Bibliotheken installiert sind (z. B. `xml.etree.ElementTree` ist in Python integriert).
+2. Platziere die XML-Dateien und die zugehörigen Bilder in einem Ordner.
+3. Führe das Skript aus:
+   - Ohne Argument: Das Skript arbeitet im aktuellen Verzeichnis.
+   - Mit Argument: Übergib das Zielverzeichnis als Parameter. Beispiel:
+     python group_files_per_class.py /pfad/zum/verzeichnis
+
+Ausgabe:
+- Die Dateien werden in nach Klassen benannte Unterverzeichnisse verschoben.
+- Am Ende wird die Anzahl der gruppierten Dateien und die Liste der gefundenen Klassen ausgegeben.
+
+Hinweise:
+- Das Skript verarbeitet nur Dateien mit genau einer Klasse pro Annotation.
+- Mehrklassen-Annotationen werden ignoriert, und eine entsprechende Warnung wird ausgegeben.
+
+Abhängigkeiten:
+- Python 3.x
+
+"""
+
+
 from sys import argv
 from pathlib import Path
 import os

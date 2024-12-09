@@ -1,3 +1,48 @@
+"""
+Beschreibung:
+Dieses Skript lädt Bilder von DuckDuckGo basierend auf einem Suchbegriff herunter. 
+Die Bilder werden entweder in einem angegebenen Zielverzeichnis oder im aktuellen Arbeitsverzeichnis gespeichert. 
+Das Skript unterstützt sowohl Einzel- als auch parallele Downloads von Bildern und bietet eine Möglichkeit, die Anzahl der heruntergeladenen Bilder zu begrenzen.
+
+Funktionsweise:
+1. Das Skript verwendet die DuckDuckGo Search API (via `duckduckgo_search`), um eine Bildersuche basierend auf einem Suchbegriff (`query`) durchzuführen.
+2. Die URLs der gefundenen Bilder werden extrahiert und die Bilder werden in einem angegebenen Zielverzeichnis gespeichert.
+3. Es gibt die Möglichkeit, die maximale Anzahl der herunterzuladenden Bilder zu begrenzen.
+4. Das Skript kann sowohl im Einzel- als auch im parallelen Download-Modus ausgeführt werden, wobei parallele Downloads schneller sind.
+
+Verwendung:
+1. Stelle sicher, dass die benötigten Bibliotheken installiert sind:
+   - `duckduckgo_search`: Installierbar via `pip install duckduckgo_search`.
+   - `joblib`, `tqdm`, `requests`, `PIL`, `mimetypes`, `urllib`, etc. (werden automatisch installiert).
+2. Führe das Skript mit den folgenden Argumenten aus:
+   - `-q` oder `--query`: (Erforderlich) Der Suchbegriff, nach dem die Bilder gesucht werden sollen.
+   - `-o` oder `--output`: (Optional) Der Pfad, in dem die Bilder gespeichert werden. Standardmäßig wird das aktuelle Verzeichnis verwendet.
+   - `-l` oder `--limit`: (Optional) Die maximale Anzahl der herunterzuladenden Bilder. Standardwert ist 50.
+   
+   Beispiel:
+      python download_images_from_ddgs.py -q "cat" -o "/pfad/zum/verzeichnis" -l 20
+
+Ausgabe:
+- Das Skript zeigt die Anzahl der erfolgreich heruntergeladenen Bilder an und speichert sie im angegebenen Zielverzeichnis.
+
+Hinweise:
+- Es werden nur Bilder heruntergeladen, die mit der ModifyCommercially-Lizenz versehen sind.
+- Das Skript verwendet parallele Downloads, um die Geschwindigkeit zu erhöhen (optional).
+- Fehler werden protokolliert, aber das Skript fährt mit den verbleibenden Downloads fort.
+
+Abhängigkeiten:
+- Python 3.x
+- duckduckgo_search
+- joblib
+- tqdm
+- requests
+- PIL
+- mimetypes
+- urllib
+
+"""
+
+
 from duckduckgo_search import DDGS
 import os, sys
 import argparse

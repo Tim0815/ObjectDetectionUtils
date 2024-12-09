@@ -1,3 +1,35 @@
+"""
+Beschreibung:
+Dieses Skript aktualisiert die Klassenlabels in XML-Annotationsdateien (im Pascal VOC-Format) innerhalb eines angegebenen Verzeichnisses. 
+Alle vorhandenen Klassenlabels in den XML-Dateien werden durch das neue Label ersetzt.
+
+Funktionsweise:
+1. Das Skript durchsucht ein angegebenes Verzeichnis (oder das aktuelle Arbeitsverzeichnis) rekursiv nach XML-Dateien.
+2. In jeder gefundenen XML-Datei werden alle Klassenlabels auf den angegebenen neuen Wert gesetzt.
+3. Die XML-Dateien werden nach der Aktualisierung gespeichert.
+
+Verwendung:
+1. Stelle sicher, dass Python 3.x installiert ist.
+2. Führe das Skript mit den erforderlichen Argumenten aus:
+   - `-p` oder `--path`: (Optional) Pfad zum Verzeichnis mit XML-Annotationsdateien. Standardmäßig wird das aktuelle Verzeichnis verwendet.
+   - `-l` oder `--label`: (Erforderlich) Das neue Klassenlabel, das in allen XML-Dateien verwendet werden soll.
+   Beispiel: python update_xml_labels.py -p "/pfad/zum/verzeichnis" -l new_class_label
+
+Ausgabe:
+- Gibt die Anzahl der verarbeiteten XML-Dateien aus.
+- Bestätigt den Abschluss der Aktualisierung.
+
+Hinweise:
+- Das neue Label wird in Kleinbuchstaben umgewandelt.
+- Es werden nur XML-Dateien im Pascal VOC-Format bearbeitet.
+
+Abhängigkeiten:
+- Python 3.x
+- xml.etree.ElementTree (In Python integriert)
+
+"""
+
+
 import os
 import argparse
 import xml.etree.ElementTree as ET

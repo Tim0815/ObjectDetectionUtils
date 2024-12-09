@@ -1,3 +1,42 @@
+"""
+Beschreibung:
+Dieses Skript konvertiert COCO-Annotationsdateien (im JSON-Format) in das Pascal VOC-Format (XML-Dateien). 
+Es durchsucht ein Verzeichnis nach JSON-Dateien, liest die COCO-Annotationen aus und erstellt für jedes Bild 
+eine entsprechende XML-Datei mit den Annotationen im Pascal VOC-Format.
+
+Funktionsweise:
+1. Das Skript durchsucht ein angegebenes Verzeichnis (oder das aktuelle Arbeitsverzeichnis) nach JSON-Dateien im COCO-Format.
+2. Jede JSON-Datei wird analysiert:
+   - Bilder und deren Metadaten werden extrahiert.
+   - Bounding Boxes und Klassennamen werden in das Pascal VOC-Format konvertiert.
+3. Für jedes Bild mit Annotationen wird eine XML-Datei erstellt, die die Konvertierung abschließt.
+
+Verwendung:
+1. Stelle sicher, dass die erforderlichen Bibliotheken installiert sind:
+   - `pycocotools`: Installierbar via `pip install pycocotools`.
+   - `pascal-voc-writer`: Installierbar via `pip install pascal-voc-writer`.
+2. Führe das Skript mit einem Zielverzeichnis aus:
+   - Ohne Argument: Das Skript arbeitet im aktuellen Verzeichnis.
+   - Mit Argument: Übergib das Verzeichnis mit den COCO-JSON-Dateien. Beispiel:
+     ```bash
+     python coco_to_voc_converter.py /pfad/zum/verzeichnis
+     ```
+3. Ausgabe:
+   - Eine XML-Datei im Pascal VOC-Format für jedes Bild mit Annotationen.
+   - Zusammenfassung der Anzahl der verarbeiteten und fehlerhaften Dateien.
+
+Hinweise:
+- Nur Bilder mit gültigen Bounding Boxes werden konvertiert.
+- Fehler beim Verarbeiten einzelner Annotationen werden ignoriert und protokolliert.
+
+Abhängigkeiten:
+- Python 3.x
+- pycocotools
+- pascal-voc-writer
+
+"""
+
+
 from sys import argv
 from pathlib import Path
 import os

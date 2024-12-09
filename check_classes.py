@@ -1,3 +1,41 @@
+"""
+Beschreibung:
+Dieses Skript überprüft XML-Annotationsdateien (im Pascal VOC-Format) in einem Verzeichnis und führt folgende Aufgaben aus:
+1. Es prüft, ob Klassennamen in Großbuchstaben vorliegen, und wandelt diese automatisch in Kleinbuchstaben um.
+2. Es sammelt alle in den XML-Dateien gefundenen Klassen und gibt diese am Ende aus.
+3. Aktualisierte XML-Dateien werden überschrieben.
+
+Funktionsweise:
+1. Das Skript durchsucht ein angegebenes Verzeichnis (oder das aktuelle Arbeitsverzeichnis) rekursiv nach XML-Dateien.
+2. Jede XML-Datei wird analysiert:
+   - Klassennamen in Großbuchstaben werden erkannt und in Kleinbuchstaben umgewandelt.
+   - Alle gefundenen Klassen werden in einer Liste gespeichert.
+3. Eine Warnung wird ausgegeben, wenn ein Großbuchstaben-Name korrigiert wird.
+
+Verwendung:
+1. Stelle sicher, dass Python 3.x installiert ist.
+2. Führe das Skript aus:
+   - Ohne Argument: Das Skript arbeitet im aktuellen Verzeichnis.
+   - Mit Argument: Übergib das Zielverzeichnis als Parameter. Beispiel:
+     ```bash
+     python check_and_update_xml_classes.py /pfad/zum/verzeichnis
+     ```
+
+Ausgabe:
+- Gibt die Anzahl der überprüften XML-Dateien aus.
+- Gibt die Anzahl der geänderten Dateien und die Liste der gefundenen Klassen aus.
+
+Hinweise:
+- Nur Klassennamen werden bearbeitet, die Großbuchstaben enthalten.
+- Es werden ausschließlich XML-Dateien im Pascal VOC-Format berücksichtigt.
+
+Abhängigkeiten:
+- Python 3.x
+- xml.etree.ElementTree (In Python integriert)
+
+"""
+
+
 from sys import argv
 from pathlib import Path
 import os
