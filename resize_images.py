@@ -77,11 +77,11 @@ def get_file_name(path):
 
 
 def process_image(file_path, output_path, x, y, mode):
-    (base_dir, file_name, ext) = get_file_name(file_path)
-    # image_path = os.path.join(base_dir, file_name + '.' + ext)
-    xml = os.path.join(base_dir, file_name + '.xml')
+    # (base_dir, file_name, ext) = get_file_name(file_path)
+    # xml = os.path.join(base_dir, file_name + '.xml')
+    xml_file = Path(file_path).with_suffix(".xml")
     try:
-        resize(file_path, xml, (x, y), output_path, mode)
+        resize(file_path, str(xml_file), (x, y), output_path, mode)
     except Exception as e:
         print('[ERROR] error with {}\n file: {}'.format(file_path, e))
         print('--------------------------------------------------')
@@ -99,6 +99,8 @@ def resize(image_path, xml_path, newSize, output_path, mode):
     scaleX = newW / imgW
     scaleY = newH / imgH
 
+    if output_path is None:
+        output_path = image_path
     mode = mode and mode.lower()
     # Standard resize mode
     if mode is None or mode == 'size':
