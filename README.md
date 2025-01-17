@@ -17,7 +17,7 @@ Use the following commands to install python 3.9 and the virtual environment in 
 <code>$ sudo apt install python3.9</code><br>
 <code>$ sudo apt install python3.9-venv</code><br>
 
-<p>Next we are going to activate the virtual environment and install all necessary dependencies.</p>
+<p>Next we are going to create and activate the virtual environment and install all necessary dependencies.</p>
 
 <code>$ python3.9 -m venv .py39</code><br>
 <code>$ source .py39/bin/activate</code><br>
