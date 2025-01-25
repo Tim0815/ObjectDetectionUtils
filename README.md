@@ -26,3 +26,4 @@ Use the following commands to install python 3.9 and the virtual environment in 
 <code>$ python3.9 -m venv .py39</code><br>
 <code>$ source .py39/bin/activate</code><br>
 <code>(.py39) $ pip install -r requirements.txt</code><br>
+<code>(.py39) $ install_dependencies.sh</code>
