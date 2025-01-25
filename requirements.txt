@@ -15,8 +15,6 @@ scikit-learn
 matplotlib
 opencv-python
 ffmpeg
-libsm6
-libxext6
 tensorflow==2.8.4
 tflite-model-maker
 tflite-support
