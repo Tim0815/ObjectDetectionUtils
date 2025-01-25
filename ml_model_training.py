@@ -14,6 +14,10 @@ from pprint import pprint #Pretty printing for output
 
 
 def trainEfficientDetLite0Model(classes, trainPath, valPath, testPath, modelFileName):
+    trainPath = trainPath.strip('/').strip('\\')
+    valPath = valPath.strip('/').strip('\\')
+    testPath = testPath.strip('/').strip('\\')
+    
     train_data = object_detector.DataLoader.from_pascal_voc(
         trainPath, #'images/train',
         trainPath,
