@@ -66,14 +66,14 @@ def groupXml(xml_path):
             localClasses.append(class_name)
 
     n = len(localClasses)
+    xmlFile = Path(xml_path)
+    currentFolder = xmlFile.parent
     if (n == 1):
         className = str(localClasses[0]).lower()
         if className not in classes:
             classes.append(className)
         for member in xmlRoot.findall('object'):
             member.find('name').text = className
-        xmlFile = Path(xml_path)
-        currentFolder = xmlFile.parent
         currentFolderName = currentFolder.name
         if (currentFolderName != className):
             newFolderName = className.capitalize()
@@ -98,13 +98,14 @@ def groupXml(xml_path):
         print(f"Found {n} classes in {xml_path}: {str(localClasses)}")
         imgFileName = xmlRoot.find('filename').text
         img_path = os.path.join(currentFolder, imgFileName)
-        multiple_classes_found.append(img_path)
+        multiple_classes_found.append(Path(img_path))
 
 
 def removeFile(fn):
     global removedCounter
     try:
         os.remove(fn)
+        print(f"Removed unlabeled file {fn}")
         removedCounter += 1
     except OSError as e:
         print(f"Error while trying to remove file {fn} : {e.strerror}")
@@ -126,10 +127,10 @@ else:
 
 if (remove_unlabeled):
     IMAGE_FORMATS = ('.jpeg', '.JPEG', '.png', '.PNG', '.jpg', '.JPG', '.webp', '.WEBP', '.avif', '.AVIF')
-    files_to_remove = [path for path in Path(images_path).rglob(IMAGE_FORMATS)]
-    files_to_remove -= multiple_classes_found
+    files_to_remove = [path for path in Path(images_path).glob('*.*')]
     for file in files_to_remove:
-        removeFile(file)
+        if file.suffix in IMAGE_FORMATS and file not in multiple_classes_found:
+            removeFile(file)
 
     print(f"Check complete. {str(groupingCounter)} files were grouped. {str(len(classes))} classes found during conversion: \n{str(classes)}\n{str(removedCounter)} unlabeled files were removed.")
 else:
