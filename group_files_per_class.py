@@ -90,8 +90,7 @@ def groupXml(xml_path):
 
                 xmlFileName = xmlFile.stem + '.' + xmlFile.suffix.removeprefix('.')
                 os.rename(xml_path, os.path.join(newFolder, xmlFileName))
-
-                os.rename(img_path, os.path.join(currentFolder, imgFileName))
+                os.rename(Path(img_path), os.path.join(newFolder, imgFileName))
                 
                 groupingCounter += 1
     else:
@@ -112,7 +111,7 @@ def removeFile(fn):
 
 
 # Find and process XML files:
-xml_file_list = [path for path in Path(images_path).rglob('*.xml')]
+xml_file_list = [path for path in Path(images_path).glob('*.xml')]
 num_files = len(xml_file_list)
 if (num_files == 0):
     print("No XML annotation files found in folder.")
