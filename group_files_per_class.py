@@ -40,17 +40,22 @@ import xml.etree.ElementTree as ET
 
 
 images_path = os.getcwd()
+remove_unlabeled = False
 if (len(argv) >= 2):
     images_path = argv[1]
+if (len(argv) >= 3):
+    remove_unlabeled = argv[2]
 print('Folder: ' + images_path)
 
 
 classes = []
 groupingCounter = 0
+multiple_classes_found = []
+removedCounter = 0
 
 # Group XML file:
 def groupXml(xml_path):
-    global classes, groupingCounter
+    global classes, groupingCounter, multiple_classes_found
 
     xmlRoot = ET.parse(xml_path).getroot()
     localClasses = []
@@ -86,12 +91,23 @@ def groupXml(xml_path):
                 xmlFileName = xmlFile.stem + '.' + xmlFile.suffix.removeprefix('.')
                 os.rename(xml_path, os.path.join(newFolder, xmlFileName))
 
-                os.rename(img_path, os.path.join(newFolder, imgFileName))
+                os.rename(img_path, os.path.join(currentFolder, imgFileName))
                 
                 groupingCounter += 1
     else:
         print(f"Found {n} classes in {xml_path}: {str(localClasses)}")
+        imgFileName = xmlRoot.find('filename').text
+        img_path = os.path.join(currentFolder, imgFileName)
+        multiple_classes_found.append(img_path)
 
+
+def removeFile(fn):
+    global removedCounter
+    try:
+        os.remove(fn)
+        removedCounter += 1
+    except OSError as e:
+        print(f"Error while trying to remove file {fn} : {e.strerror}")
 
 
 # Find and process XML files:
@@ -108,4 +124,13 @@ else:
         except:
             print(f"Error occured in file {file}!")
 
-print(f"Check complete. {str(groupingCounter)} files were grouped. {str(len(classes))} classes found during conversion: \n{str(classes)}")
+if (remove_unlabeled):
+    IMAGE_FORMATS = ('.jpeg', '.JPEG', '.png', '.PNG', '.jpg', '.JPG', '.webp', '.WEBP', '.avif', '.AVIF')
+    files_to_remove = [path for path in Path(images_path).rglob(IMAGE_FORMATS)]
+    files_to_remove -= multiple_classes_found
+    for file in files_to_remove:
+        removeFile(file)
+
+    print(f"Check complete. {str(groupingCounter)} files were grouped. {str(len(classes))} classes found during conversion: \n{str(classes)}\n{str(removedCounter)} unlabeled files were removed.")
+else:
+    print(f"Check complete. {str(groupingCounter)} files were grouped. {str(len(classes))} classes found during conversion: \n{str(classes)}")
