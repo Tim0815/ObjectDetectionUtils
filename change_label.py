@@ -74,7 +74,7 @@ if (image_path is None or image_path == '.'):
     image_path = os.getcwd()
 
 new_label = args.new_label
-if (new_label is None or new_label == '.'):
+if (new_label is None or new_label.strip() == ''):
     print('New class label must be given! Use argument -l NEW_LABEL for new label name.')
 else:
     new_label = new_label.lower()
@@ -84,7 +84,7 @@ else:
     if (num_files == 0):
         print('No XML annotation files found in folder.')
     else:
-        print('Converting ' + str(num_files) + ' XML annotation files...')
+        print(f'Processing {num_files} XML annotation files...')
 
         for file in annotation_files_list:
             updateXml(file, new_label)
